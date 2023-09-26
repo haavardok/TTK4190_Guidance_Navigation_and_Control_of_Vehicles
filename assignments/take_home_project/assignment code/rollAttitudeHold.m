@@ -1,0 +1,28 @@
+function [delta_a_c,phi_int] = rollAttitudeHold(a_phi1,a_phi2,p,phi,phi_c,phi_int,h)
+
+% Add your controller gains and PID roll attitude controller here
+
+% Parameters
+D2R = pi / 180;
+delta_a_max = 21 * D2R;   % maximum aileron [rad]
+
+% Design parameters
+e_phi_max = 15 * D2R;     % from problem description
+zeta_phi = 0.8;           % from problem description
+
+% Gains
+k_p_phi = delta_a_max / e_phi_max;  % Beard eq. 6.7
+omega_n_phi = abs(sqrt(k_p_phi * a_phi2));  % Beard eq. 6.7 with some manipulations
+k_d_phi = (2 * zeta_phi * omega_n_phi - a_phi1) / a_phi2;   % Beard eq. 6.7
+k_i_phi = (k_p_phi * omega_n_phi) / 10;
+
+% Calculating PD gain
+%delta_a_c = k_p_phi * (phi - phi_c) - k_d_phi * p; % Need to switch phi_c and phi because of sign in model
+
+% Calculating PID gain
+delta_a_c = k_p_phi * (phi - phi_c) - k_d_phi * p - k_i_phi * phi_int; % Need to switch phi_c and phi because of sign in model
+
+% Euler's method: phi_int[k+1]
+phi_int = phi_int + h * (phi_c - phi);
+
+end
